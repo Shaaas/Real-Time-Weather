@@ -1,7 +1,6 @@
 :root {
     --glass: rgba(255, 255, 255, 0.2);
     --glass-border: rgba(255, 255, 255, 0.3);
-    --text-white: #ffffff;
 }
 
 * {
@@ -14,13 +13,15 @@
 body {
     background: linear-gradient(135deg, #00b4db, #0083b0);
     background-attachment: fixed;
-    min-height: 100vh;
+    min-height: 100vh; /* Changed from height to min-height */
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    color: var(--text-white);
-    transition: background 0.8s ease; /* For the dynamic background changes */
-    padding: 20px;
+    justify-content: flex-start; /* Start from top, center horizontally */
+    color: white;
+    transition: background 0.8s ease;
+    padding: 50px 20px; /* Added breathing room at the top */
+    overflow-y: auto; /* Allows scrolling on smaller screens */
 }
 
 .app-container {
@@ -28,11 +29,17 @@ body {
     max-width: 400px;
 }
 
-/* --- Search Bar --- */
+/* --- Search Bar Fixes --- */
+header {
+    width: 100%;
+    margin-bottom: 25px;
+    flex-shrink: 0; /* Prevents header from squashing */
+}
+
 header form {
     display: flex;
     gap: 10px;
-    margin-bottom: 25px;
+    align-items: center;
 }
 
 #city-input {
@@ -48,22 +55,18 @@ header form {
     font-size: 1rem;
 }
 
-#city-input::placeholder { color: rgba(255, 255, 255, 0.7); }
-
 #search-btn {
-    padding: 0 20px;
+    padding: 15px 20px;
     border-radius: 15px;
     border: none;
     background: white;
     color: #0083b0;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s;
 }
 
-#search-btn:hover { transform: scale(1.05); }
-
-/* --- Main Card --- */
+/* --- Weather Card --- */
 .weather-card {
     background: var(--glass);
     backdrop-filter: blur(15px);
@@ -75,64 +78,40 @@ header form {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-#city-name { font-size: 2rem; font-weight: 600; }
-#weather-icon { width: 100px; margin: -10px 0; }
-#temp { font-size: 4.5rem; font-weight: 700; margin: 5px 0; }
+#temp { font-size: 4rem; font-weight: 700; margin: 5px 0; }
+#weather-icon { width: 90px; }
 #feels-like { opacity: 0.8; font-size: 0.9rem; margin-bottom: 10px; }
-#description { text-transform: capitalize; font-size: 1.1rem; letter-spacing: 0.5px; }
 
-/* --- Details Grid --- */
+/* --- Grids --- */
 .details-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    margin-top: 30px;
-    padding-top: 25px;
-    border-top: 1px solid var(--glass-border);
-}
-
-.detail-item span { display: block; font-size: 0.75rem; opacity: 0.7; margin-bottom: 5px; }
-.detail-item p { font-size: 1.1rem; font-weight: 600; }
-
-/* --- Forecast Section --- */
-.forecast-section {
-    margin-top: 30px;
+    margin-top: 25px;
     padding-top: 20px;
     border-top: 1px solid var(--glass-border);
 }
 
-.forecast-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 15px;
-    opacity: 0.9;
+.forecast-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--glass-border);
 }
 
 .forecast-grid {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
+    margin-top: 15px;
 }
 
 .forecast-item {
     background: rgba(255, 255, 255, 0.1);
-    padding: 12px 8px;
-    border-radius: 15px;
+    padding: 10px 5px;
+    border-radius: 12px;
     flex: 1;
-    transition: transform 0.3s ease;
 }
 
-.forecast-item:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.15); }
 .forecast-day { font-size: 0.7rem; opacity: 0.8; margin-bottom: 5px; }
-.forecast-item img { width: 40px; }
-.forecast-item p { font-size: 0.9rem; font-weight: 600; }
+.forecast-item img { width: 35px; }
 
-/* --- Helpers --- */
 .hidden { display: none; }
-
-/* --- Mobile Fixes --- */
-@media (max-width: 350px) {
-    .forecast-grid { flex-direction: column; }
-    .forecast-item { margin-bottom: 5px; }
-}
