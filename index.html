@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkyCast | Modern Weather</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="app-container">
         <header>
             <form id="search-form">
-                <input type="text" id="city-input" placeholder="Enter city name..." autocomplete="off">
+                <input type="text" id="city-input" placeholder="Enter city..." autocomplete="off">
                 <button type="submit" id="search-btn">Search</button>
             </form>
         </header>
@@ -36,9 +36,12 @@
                         <span>Wind Speed</span>
                         <p id="wind">-- km/h</p>
                     </div>
-                    <div class="forecast-title">3-Day Forecast</div>
-<div id="forecast-container" class="forecast-grid">
-    </div>
+                </div>
+
+                <div class="forecast-section">
+                    <p class="forecast-title">3-Day Forecast</p>
+                    <div id="forecast-container" class="forecast-grid">
+                        </div>
                 </div>
             </div>
         </main>
