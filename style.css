@@ -1,0 +1,92 @@
+:root {
+    --glass: rgba(255, 255, 255, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --text: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #00b4db, #0083b0); /* Default sky blue */
+    background-attachment: fixed;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text);
+}
+
+.app-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+/* Search Bar Styling */
+header form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+#city-input {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 30px;
+    background: var(--glass);
+    color: white;
+    backdrop-filter: blur(10px);
+    outline: none;
+}
+
+#city-input::placeholder { color: rgba(255, 255, 255, 0.7); }
+
+#search-btn {
+    padding: 0 25px;
+    border-radius: 30px;
+    border: none;
+    background: white;
+    color: #0083b0;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#search-btn:hover { background: #f0f0f0; transform: scale(1.05); }
+
+/* Weather Card */
+.weather-card {
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    padding: 40px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+#city-name { font-size: 2.5rem; margin-bottom: 5px; }
+#date { font-weight: 300; opacity: 0.8; margin-bottom: 20px; }
+#weather-icon { width: 100px; }
+#temp { font-size: 4rem; font-weight: 700; margin: 10px 0; }
+#description { text-transform: capitalize; font-size: 1.2rem; letter-spacing: 1px; }
+
+/* Details Grid */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.detail-item span { display: block; font-size: 0.8rem; opacity: 0.7; }
+.detail-item p { font-size: 1.2rem; font-weight: 600; }
+
+.hidden { display: none; }
