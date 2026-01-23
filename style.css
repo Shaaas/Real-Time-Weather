@@ -13,38 +13,38 @@
 body {
     background: linear-gradient(135deg, #00b4db, #0083b0);
     background-attachment: fixed;
-    min-height: 100vh; /* Changed from height to min-height */
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Start from top, center horizontally */
     color: white;
     transition: background 0.8s ease;
-    padding: 50px 20px; /* Added breathing room at the top */
-    overflow-y: auto; /* Allows scrolling on smaller screens */
+    padding: 40px 20px; /* Safe padding for top of screen */
+    overflow-y: auto;
 }
 
 .app-container {
     width: 100%;
     max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* --- Search Bar Fixes --- */
 header {
     width: 100%;
-    margin-bottom: 25px;
-    flex-shrink: 0; /* Prevents header from squashing */
+    flex-shrink: 0;
 }
 
 header form {
     display: flex;
     gap: 10px;
-    align-items: center;
 }
 
 #city-input {
     flex: 1;
-    padding: 15px 20px;
+    height: 50px;
+    padding: 0 20px;
     border: none;
     border-radius: 15px;
     background: var(--glass);
@@ -56,7 +56,8 @@ header form {
 }
 
 #search-btn {
-    padding: 15px 20px;
+    height: 50px;
+    padding: 0 20px;
     border-radius: 15px;
     border: none;
     background: white;
@@ -66,7 +67,8 @@ header form {
     transition: transform 0.2s;
 }
 
-/* --- Weather Card --- */
+#search-btn:hover { transform: scale(1.05); }
+
 .weather-card {
     background: var(--glass);
     backdrop-filter: blur(15px);
@@ -82,7 +84,6 @@ header form {
 #weather-icon { width: 90px; }
 #feels-like { opacity: 0.8; font-size: 0.9rem; margin-bottom: 10px; }
 
-/* --- Grids --- */
 .details-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -97,11 +98,18 @@ header form {
     border-top: 1px solid var(--glass-border);
 }
 
+.forecast-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 15px;
+}
+
 .forecast-grid {
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    margin-top: 15px;
 }
 
 .forecast-item {
@@ -111,7 +119,6 @@ header form {
     flex: 1;
 }
 
-.forecast-day { font-size: 0.7rem; opacity: 0.8; margin-bottom: 5px; }
-.forecast-item img { width: 35px; }
+.forecast-day { font-size: 0.7rem; opacity: 0.8; }
 
 .hidden { display: none; }
