@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyCast | Cinematic Weather</title>
+    <title>SkyCast Pro</title>
+    <link rel="icon" href="https://fav.farm/🌤️" />
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
 </head>
@@ -18,24 +19,27 @@
     <div class="dashboard">
         <header class="top-bar">
             <div class="brand">Sky<span>Cast</span></div>
-            <form id="search-form">
-                <input type="text" id="city-input" placeholder="Explore city..." autocomplete="off">
-                <button type="submit">Search</button>
-            </form>
+            <div class="controls">
+                <button id="unit-toggle" class="glass-btn">°C</button>
+                <form id="search-form">
+                    <input type="text" id="city-input" placeholder="Search city..." autocomplete="off">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
         </header>
 
-        <main id="weather-display" class="hidden">
-            <div class="bento-grid">
+        <main id="weather-display">
+            <div class="bento-grid" id="main-grid">
                 <div class="tile hero-tile">
                     <div class="hero-header">
-                        <h1 id="city-name">---</h1>
-                        <p id="local-date">Tuesday, 24 Feb</p>
+                        <h1 id="city-name">Ready?</h1>
+                        <p id="local-date">Search a city to begin</p>
                     </div>
                     <div class="hero-body">
                         <h2 id="temp">--°</h2>
-                        <img id="weather-icon" src="" alt="icon">
+                        <img id="weather-icon" src="" alt="">
                     </div>
-                    <p id="description" class="weather-desc">---</p>
+                    <p id="description" class="weather-desc">Awaiting input...</p>
                 </div>
 
                 <div class="tile stat-tile">
@@ -45,13 +49,13 @@
                 </div>
 
                 <div class="tile stat-tile">
-                    <span class="label">Wind Velocity</span>
-                    <p id="wind" class="value">-- km/h</p>
-                    <span id="wind-dir" class="sub-label">Atmospheric Flow</span>
+                    <span class="label">Wind Flow</span>
+                    <p id="wind" class="value">--</p>
+                    <span id="wind-dir" class="sub-label">Direction: --</span>
                 </div>
 
                 <div class="tile forecast-tile">
-                    <h3 class="label">Projected Forecast</h3>
+                    <h3 class="label">Projected 3-Day</h3>
                     <div id="forecast-container" class="forecast-row"></div>
                 </div>
             </div>
