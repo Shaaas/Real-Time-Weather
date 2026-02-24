@@ -3,52 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyCast Pro | Premium Weather</title>
+    <title>SkyCast | Cinematic Weather</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="app-container">
-        <header>
-            <div class="search-row">
-                <button id="geo-btn" class="icon-btn" title="Use current location">📍</button>
-                <form id="search-form">
-                    <input type="text" id="city-input" placeholder="Search city..." autocomplete="off">
-                </form>
-            </div>
-            <div id="recent-searches" class="history-tags"></div>
-        </header>
+    <div class="parallax-bg">
+        <div id="blob-1" class="blob"></div>
+        <div id="blob-2" class="blob"></div>
+        <div id="blob-3" class="blob"></div>
+    </div>
 
-        <div id="loader" class="hidden">Scanning the skies...</div>
+    <div class="dashboard">
+        <header class="top-bar">
+            <div class="brand">Sky<span>Cast</span></div>
+            <form id="search-form">
+                <input type="text" id="city-input" placeholder="Explore city..." autocomplete="off">
+                <button type="submit">Search</button>
+            </form>
+        </header>
 
         <main id="weather-display" class="hidden">
             <div class="bento-grid">
-                <div class="tile tile-large">
-                    <div class="tile-header">
+                <div class="tile hero-tile">
+                    <div class="hero-header">
                         <h1 id="city-name">---</h1>
-                        <span id="local-time">--:--</span>
+                        <p id="local-date">Tuesday, 24 Feb</p>
                     </div>
-                    <div class="main-stats">
-                        <h2 id="temp">--°C</h2>
-                        <img id="weather-icon" src="" alt="">
+                    <div class="hero-body">
+                        <h2 id="temp">--°</h2>
+                        <img id="weather-icon" src="" alt="icon">
                     </div>
-                    <p id="description">---</p>
+                    <p id="description" class="weather-desc">---</p>
                 </div>
 
-                <div class="tile tile-small">
-                    <span>Humidity</span>
-                    <p id="humidity">--%</p>
-                </div>
-                
-                <div class="tile tile-small">
-                    <span>Wind</span>
-                    <p id="wind">-- km/h</p>
+                <div class="tile stat-tile">
+                    <span class="label">Humidity</span>
+                    <p id="humidity" class="value">--%</p>
+                    <div class="progress-bar"><div id="humidity-bar" style="width: 0%"></div></div>
                 </div>
 
-                <div class="tile tile-medium">
-                    <h3>Next 3 Days</h3>
-                    <div id="forecast-container" class="forecast-flex"></div>
+                <div class="tile stat-tile">
+                    <span class="label">Wind Velocity</span>
+                    <p id="wind" class="value">-- km/h</p>
+                    <span id="wind-dir" class="sub-label">Atmospheric Flow</span>
+                </div>
+
+                <div class="tile forecast-tile">
+                    <h3 class="label">Projected Forecast</h3>
+                    <div id="forecast-container" class="forecast-row"></div>
                 </div>
             </div>
         </main>
