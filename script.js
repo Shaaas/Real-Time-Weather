@@ -1,110 +1,89 @@
 const apiKey = CONFIG.WEATHER_API_KEY;
-const searchForm = document.getElementById("search-form");
-const cityInput = document.getElementById("city-input");
-const weatherDisplay = document.getElementById("weather-display");
-const loader = document.getElementById("loader");
-const geoBtn = document.getElementById("geo-btn");
-const historyContainer = document.getElementById("recent-searches");
 
-let searchHistory = JSON.parse(localStorage.getItem("weatherHistory")) || [];
+// 1. 3D Tilt Effect
+document.addEventListener("mousemove", (e) => {
+    const tiles = document.querySelectorAll(".tile");
+    // Calculate rotation based on mouse position relative to center
+    const xAxis = (window.innerWidth / 2 - e.pageX) / 40; 
+    const yAxis = (window.innerHeight / 2 - e.pageY) / 40;
 
-// 1. Initial Load
-window.onload = () => {
-    renderHistory();
-    if (searchHistory.length > 0) fetchWeatherData(searchHistory[0]);
-};
-
-// 2. Geolocation Feature
-geoBtn.addEventListener("click", () => {
-    navigator.geolocation.getCurrentPosition(position => {
-        const { latitude, longitude } = position.coords;
-        fetchWeatherData(null, latitude, longitude);
+    tiles.forEach(tile => {
+        tile.style.transform = `rotateY(${-xAxis}deg) rotateX(${yAxis}deg)`;
     });
 });
 
-// 3. Main Fetch Function
-async function fetchWeatherData(city, lat = null, lon = null) {
-    loader.classList.remove("hidden");
-    weatherDisplay.classList.add("hidden");
+// 2. Search Logic
+document.getElementById("search-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const city = document.getElementById("city-input").value.trim();
+    if (city) fetchWeather(city);
+});
 
-    let currentUrl, forecastUrl;
+async function fetchWeather(city) {
+    const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
     
-    if (lat && lon) {
-        currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
-        forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
-    } else {
-        currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
-        forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
-    }
-
     try {
-        const [currentRes, forecastRes] = await Promise.all([fetch(currentUrl), fetch(forecastUrl)]);
-        if (!currentRes.ok) throw new Error("City not found");
+        const [currRes, foreRes] = await Promise.all([fetch(currentUrl), fetch(forecastUrl)]);
+        if (!currRes.ok) throw new Error("City not found");
 
-        const currentData = await currentRes.json();
-        const forecastData = await forecastRes.json();
+        const curr = await currRes.json();
+        const fore = await foreRes.json();
 
-        updateUI(currentData, forecastData);
-        saveToHistory(currentData.name);
+        updateUI(curr, fore);
+        updateAtmosphere(curr.weather[0].main);
     } catch (err) {
         alert(err.message);
-    } finally {
-        loader.classList.add("hidden");
     }
 }
 
-// 4. Update UI with Local Time
-function updateUI(current, forecast) {
-    document.getElementById("city-name").innerText = current.name;
-    document.getElementById("temp").innerText = `${Math.round(current.main.temp)}°C`;
+// 3. Update Atmosphere (The "Liquid" shift)
+function updateAtmosphere(condition) {
+    const b1 = document.getElementById("blob-1");
+    const b2 = document.getElementById("blob-2");
+    const b3 = document.getElementById("blob-3");
+
+    const themes = {
+        Clear: ["#f59e0b", "#ef4444", "#3b82f6"],
+        Rain: ["#1e293b", "#334155", "#0f172a"],
+        Clouds: ["#64748b", "#94a3b8", "#1e293b"],
+        Snow: ["#e2e8f0", "#94a3b8", "#f8fafc"],
+        Thunderstorm: ["#4c1d95", "#1e1b4b", "#000000"]
+    };
+
+    const colors = themes[condition] || themes.Clear;
+    b1.style.background = colors[0];
+    b2.style.background = colors[1];
+    b3.style.background = colors[2];
+}
+
+// 4. Update UI
+function updateUI(curr, fore) {
+    document.getElementById("city-name").innerText = curr.name;
+    document.getElementById("temp").innerText = `${Math.round(curr.main.temp)}°`;
+    document.getElementById("humidity").innerText = `${curr.main.humidity}%`;
+    document.getElementById("humidity-bar").style.width = `${curr.main.humidity}%`;
+    document.getElementById("wind").innerText = `${Math.round(curr.wind.speed)} km/h`;
+    document.getElementById("description").innerText = curr.weather[0].description;
     
-    // Calculate Local Time using timezone offset
-    const utcDate = new Date().getTime() + (new Date().getTimezoneOffset() * 60000);
-    const localDate = new Date(utcDate + (current.timezone * 1000));
-    document.getElementById("local-time").innerText = localDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    document.getElementById("humidity").innerText = `${current.main.humidity}%`;
-    document.getElementById("wind").innerText = `${current.wind.speed} km/h`;
-    document.getElementById("description").innerText = current.weather[0].description;
+    document.getElementById("weather-icon").src = `https://openweathermap.org/img/wn/${curr.weather[0].icon}@4x.png`;
     
-    const iconCode = current.weather[0].icon;
-    document.getElementById("weather-icon").src = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+    const options = { weekday: 'long', day: 'numeric', month: 'short' };
+    document.getElementById("local-date").innerText = new Date().toLocaleDateString('en-US', options);
 
-    renderForecast(forecast);
-    weatherDisplay.classList.remove("hidden");
-}
-
-// 5. Search History Logic
-function saveToHistory(city) {
-    if (!searchHistory.includes(city)) {
-        searchHistory.unshift(city);
-        if (searchHistory.length > 5) searchHistory.pop();
-        localStorage.setItem("weatherHistory", JSON.stringify(searchHistory));
-        renderHistory();
-    }
-}
-
-function renderHistory() {
-    historyContainer.innerHTML = searchHistory.map(city => `<span class="tag" onclick="fetchWeatherData('${city}')">${city}</span>`).join("");
-}
-
-function renderForecast(data) {
     const container = document.getElementById("forecast-container");
     container.innerHTML = "";
     for (let i = 8; i <= 24; i += 8) {
-        const day = data.list[i];
-        const date = new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' });
+        const d = fore.list[i];
+        const day = new Date(d.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' });
         container.innerHTML += `
             <div class="forecast-item">
-                <p class="forecast-day">${date}</p>
-                <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png">
-                <p>${Math.round(day.main.temp)}°C</p>
+                <p class="label">${day}</p>
+                <img src="https://openweathermap.org/img/wn/${d.weather[0].icon}.png">
+                <p class="value" style="font-size: 1.4rem">${Math.round(d.main.temp)}°</p>
             </div>
         `;
     }
-}
 
-searchForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    fetchWeatherData(cityInput.value.trim());
-});
+    document.getElementById("weather-display").classList.remove("hidden");
+}
