@@ -2,82 +2,109 @@ const apiKey = CONFIG.WEATHER_API_KEY;
 const searchForm = document.getElementById("search-form");
 const cityInput = document.getElementById("city-input");
 const weatherDisplay = document.getElementById("weather-display");
-const forecastContainer = document.getElementById("forecast-container");
+const loader = document.getElementById("loader");
+const geoBtn = document.getElementById("geo-btn");
+const historyContainer = document.getElementById("recent-searches");
 
-searchForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const city = cityInput.value.trim();
-    if (city) fetchWeatherData(city);
+let searchHistory = JSON.parse(localStorage.getItem("weatherHistory")) || [];
+
+// 1. Initial Load
+window.onload = () => {
+    renderHistory();
+    if (searchHistory.length > 0) fetchWeatherData(searchHistory[0]);
+};
+
+// 2. Geolocation Feature
+geoBtn.addEventListener("click", () => {
+    navigator.geolocation.getCurrentPosition(position => {
+        const { latitude, longitude } = position.coords;
+        fetchWeatherData(null, latitude, longitude);
+    });
 });
 
-async function fetchWeatherData(city) {
-    const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
-    
-    try {
-        const [currentRes, forecastRes] = await Promise.all([
-            fetch(currentUrl),
-            fetch(forecastUrl)
-        ]);
+// 3. Main Fetch Function
+async function fetchWeatherData(city, lat = null, lon = null) {
+    loader.classList.remove("hidden");
+    weatherDisplay.classList.add("hidden");
 
+    let currentUrl, forecastUrl;
+    
+    if (lat && lon) {
+        currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+        forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+    } else {
+        currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
+        forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
+    }
+
+    try {
+        const [currentRes, forecastRes] = await Promise.all([fetch(currentUrl), fetch(forecastUrl)]);
         if (!currentRes.ok) throw new Error("City not found");
 
         const currentData = await currentRes.json();
         const forecastData = await forecastRes.json();
 
-        updateCurrentUI(currentData);
-        updateForecastUI(forecastData);
-        
-    } catch (error) {
-        alert(error.message);
+        updateUI(currentData, forecastData);
+        saveToHistory(currentData.name);
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        loader.classList.add("hidden");
     }
 }
 
-function updateCurrentUI(data) {
-    document.getElementById("city-name").innerText = data.name;
-    document.getElementById("temp").innerText = `${Math.round(data.main.temp)}°C`;
-    document.getElementById("feels-like").innerText = `Feels like: ${Math.round(data.main.feels_like)}°C`;
-    document.getElementById("description").innerText = data.weather[0].description;
-    document.getElementById("humidity").innerText = `${data.main.humidity}%`;
-    document.getElementById("wind").innerText = `${data.wind.speed} km/h`;
+// 4. Update UI with Local Time
+function updateUI(current, forecast) {
+    document.getElementById("city-name").innerText = current.name;
+    document.getElementById("temp").innerText = `${Math.round(current.main.temp)}°C`;
     
-    const iconCode = data.weather[0].icon;
-    document.getElementById("weather-icon").src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+    // Calculate Local Time using timezone offset
+    const utcDate = new Date().getTime() + (new Date().getTimezoneOffset() * 60000);
+    const localDate = new Date(utcDate + (current.timezone * 1000));
+    document.getElementById("local-time").innerText = localDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    updateBackground(data.weather[0].main);
+    document.getElementById("humidity").innerText = `${current.main.humidity}%`;
+    document.getElementById("wind").innerText = `${current.wind.speed} km/h`;
+    document.getElementById("description").innerText = current.weather[0].description;
+    
+    const iconCode = current.weather[0].icon;
+    document.getElementById("weather-icon").src = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+
+    renderForecast(forecast);
     weatherDisplay.classList.remove("hidden");
-    cityInput.value = "";
 }
 
-function updateForecastUI(data) {
-    forecastContainer.innerHTML = "";
-    // Grab items for the next 3 days
-    for (let i = 8; i <= 24; i += 8) {
-        const dayData = data.list[i];
-        const date = new Date(dayData.dt * 1000);
-        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+// 5. Search History Logic
+function saveToHistory(city) {
+    if (!searchHistory.includes(city)) {
+        searchHistory.unshift(city);
+        if (searchHistory.length > 5) searchHistory.pop();
+        localStorage.setItem("weatherHistory", JSON.stringify(searchHistory));
+        renderHistory();
+    }
+}
 
-        const forecastHTML = `
+function renderHistory() {
+    historyContainer.innerHTML = searchHistory.map(city => `<span class="tag" onclick="fetchWeatherData('${city}')">${city}</span>`).join("");
+}
+
+function renderForecast(data) {
+    const container = document.getElementById("forecast-container");
+    container.innerHTML = "";
+    for (let i = 8; i <= 24; i += 8) {
+        const day = data.list[i];
+        const date = new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' });
+        container.innerHTML += `
             <div class="forecast-item">
-                <p class="forecast-day">${dayName}</p>
-                <img src="https://openweathermap.org/img/wn/${dayData.weather[0].icon}.png" alt="icon">
-                <p>${Math.round(dayData.main.temp)}°C</p>
+                <p class="forecast-day">${date}</p>
+                <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png">
+                <p>${Math.round(day.main.temp)}°C</p>
             </div>
         `;
-        forecastContainer.insertAdjacentHTML('beforeend', forecastHTML);
     }
 }
 
-function updateBackground(condition) {
-    const body = document.body;
-    let color = "";
-    switch (condition) {
-        case "Clear": color = "linear-gradient(135deg, #f7b733, #fc4a1a)"; break;
-        case "Rain": 
-        case "Drizzle": color = "linear-gradient(135deg, #616161, #9bc5c3)"; break;
-        case "Clouds": color = "linear-gradient(135deg, #757f9a, #d7dde8)"; break;
-        case "Snow": color = "linear-gradient(135deg, #83a4d4, #b6fbff)"; break;
-        default: color = "linear-gradient(135deg, #00b4db, #0083b0)";
-    }
-    body.style.background = color;
-}
+searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    fetchWeatherData(cityInput.value.trim());
+});
