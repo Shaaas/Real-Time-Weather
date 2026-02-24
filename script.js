@@ -1,18 +1,26 @@
 const apiKey = CONFIG.WEATHER_API_KEY;
+let currentUnit = 'metric'; // 'metric' = C, 'imperial' = F
 
-// 1. 3D Tilt Effect
+// 1. Interactive 3D Tilt
 document.addEventListener("mousemove", (e) => {
     const tiles = document.querySelectorAll(".tile");
-    // Calculate rotation based on mouse position relative to center
-    const xAxis = (window.innerWidth / 2 - e.pageX) / 40; 
-    const yAxis = (window.innerHeight / 2 - e.pageY) / 40;
-
+    const xAxis = (window.innerWidth / 2 - e.pageX) / 45;
+    const yAxis = (window.innerHeight / 2 - e.pageY) / 45;
     tiles.forEach(tile => {
         tile.style.transform = `rotateY(${-xAxis}deg) rotateX(${yAxis}deg)`;
     });
 });
 
-// 2. Search Logic
+// 2. Unit Toggle Logic
+const unitBtn = document.getElementById("unit-toggle");
+unitBtn.addEventListener("click", () => {
+    currentUnit = currentUnit === 'metric' ? 'imperial' : 'metric';
+    unitBtn.innerText = currentUnit === 'metric' ? '°C' : '°F';
+    const lastCity = document.getElementById("city-name").innerText;
+    if (lastCity && lastCity !== "Ready?") fetchWeather(lastCity);
+});
+
+// 3. Search Handler
 document.getElementById("search-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const city = document.getElementById("city-input").value.trim();
@@ -20,12 +28,12 @@ document.getElementById("search-form").addEventListener("submit", (e) => {
 });
 
 async function fetchWeather(city) {
-    const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
+    const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=${currentUnit}&appid=${apiKey}`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=${currentUnit}&appid=${apiKey}`;
     
     try {
         const [currRes, foreRes] = await Promise.all([fetch(currentUrl), fetch(forecastUrl)]);
-        if (!currRes.ok) throw new Error("City not found");
+        if (!currRes.ok) throw new Error("Location not found");
 
         const curr = await currRes.json();
         const fore = await foreRes.json();
@@ -37,35 +45,38 @@ async function fetchWeather(city) {
     }
 }
 
-// 3. Update Atmosphere (The "Liquid" shift)
 function updateAtmosphere(condition) {
-    const b1 = document.getElementById("blob-1");
-    const b2 = document.getElementById("blob-2");
-    const b3 = document.getElementById("blob-3");
-
+    const blobs = [document.getElementById("blob-1"), document.getElementById("blob-2"), document.getElementById("blob-3")];
     const themes = {
         Clear: ["#f59e0b", "#ef4444", "#3b82f6"],
-        Rain: ["#1e293b", "#334155", "#0f172a"],
-        Clouds: ["#64748b", "#94a3b8", "#1e293b"],
-        Snow: ["#e2e8f0", "#94a3b8", "#f8fafc"],
-        Thunderstorm: ["#4c1d95", "#1e1b4b", "#000000"]
+        Rain: ["#0f172a", "#334155", "#1e293b"],
+        Clouds: ["#475569", "#94a3b8", "#1e293b"],
+        Snow: ["#f8fafc", "#cbd5e1", "#94a3b8"],
+        Thunderstorm: ["#4c1d95", "#1e1b4b", "#020617"]
     };
-
     const colors = themes[condition] || themes.Clear;
-    b1.style.background = colors[0];
-    b2.style.background = colors[1];
-    b3.style.background = colors[2];
+    blobs.forEach((b, i) => b.style.background = colors[i]);
+    
+    // Update Favicon
+    const icons = { Clear: "☀️", Rain: "🌧️", Clouds: "☁️", Snow: "❄️" };
+    document.querySelector("link[rel='icon']").href = `https://fav.farm/${icons[condition] || "🌤️"}`;
 }
 
-// 4. Update UI
 function updateUI(curr, fore) {
     document.getElementById("city-name").innerText = curr.name;
     document.getElementById("temp").innerText = `${Math.round(curr.main.temp)}°`;
     document.getElementById("humidity").innerText = `${curr.main.humidity}%`;
     document.getElementById("humidity-bar").style.width = `${curr.main.humidity}%`;
-    document.getElementById("wind").innerText = `${Math.round(curr.wind.speed)} km/h`;
-    document.getElementById("description").innerText = curr.weather[0].description;
     
+    const unitLabel = currentUnit === 'metric' ? 'km/h' : 'mph';
+    document.getElementById("wind").innerText = `${Math.round(curr.wind.speed)} ${unitLabel}`;
+    
+    // Wind Rotation
+    const arrow = document.getElementById("wind-dir");
+    arrow.innerText = "↑";
+    arrow.style.transform = `rotate(${curr.wind.deg}deg)`;
+
+    document.getElementById("description").innerText = curr.weather[0].description;
     document.getElementById("weather-icon").src = `https://openweathermap.org/img/wn/${curr.weather[0].icon}@4x.png`;
     
     const options = { weekday: 'long', day: 'numeric', month: 'short' };
@@ -84,6 +95,4 @@ function updateUI(curr, fore) {
             </div>
         `;
     }
-
-    document.getElementById("weather-display").classList.remove("hidden");
 }
