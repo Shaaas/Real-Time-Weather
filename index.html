@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyCast | Modern Weather</title>
+    <title>SkyCast Pro | Premium Weather</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -11,42 +11,50 @@
 
     <div class="app-container">
         <header>
-            <form id="search-form">
-                <input type="text" id="city-input" placeholder="Enter city name..." autocomplete="off">
-                <button type="submit" id="search-btn">Search</button>
-            </form>
+            <div class="search-row">
+                <button id="geo-btn" class="icon-btn" title="Use current location">📍</button>
+                <form id="search-form">
+                    <input type="text" id="city-input" placeholder="Search city..." autocomplete="off">
+                </form>
+            </div>
+            <div id="recent-searches" class="history-tags"></div>
         </header>
 
+        <div id="loader" class="hidden">Scanning the skies...</div>
+
         <main id="weather-display" class="hidden">
-            <div class="weather-card">
-                <div class="main-info">
-                    <h1 id="city-name">London</h1>
-                    <img id="weather-icon" src="" alt="Weather Icon">
-                    <h2 id="temp">--°C</h2>
-                    <p id="feels-like">Feels like: --</p>
-                    <p id="description">Partly Cloudy</p>
+            <div class="bento-grid">
+                <div class="tile tile-large">
+                    <div class="tile-header">
+                        <h1 id="city-name">---</h1>
+                        <span id="local-time">--:--</span>
+                    </div>
+                    <div class="main-stats">
+                        <h2 id="temp">--°C</h2>
+                        <img id="weather-icon" src="" alt="">
+                    </div>
+                    <p id="description">---</p>
                 </div>
 
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <span>Humidity</span>
-                        <p id="humidity">--%</p>
-                    </div>
-                    <div class="detail-item">
-                        <span>Wind Speed</span>
-                        <p id="wind">-- km/h</p>
-                    </div>
+                <div class="tile tile-small">
+                    <span>Humidity</span>
+                    <p id="humidity">--%</p>
+                </div>
+                
+                <div class="tile tile-small">
+                    <span>Wind</span>
+                    <p id="wind">-- km/h</p>
                 </div>
 
-                <div class="forecast-section">
-                    <p class="forecast-title">3-Day Forecast</p>
-                    <div id="forecast-container" class="forecast-grid">
-                        </div>
+                <div class="tile tile-medium">
+                    <h3>Next 3 Days</h3>
+                    <div id="forecast-container" class="forecast-flex"></div>
                 </div>
             </div>
         </main>
     </div>
-<script src="config.js"></script>
-<script src="script.js"></script>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
